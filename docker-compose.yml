@@ -1,11 +1,7 @@
-version: '3.8'
-
 services:
   backend:
-    image: amine-api
-    container_name: backend-api
-    ports:
-      - "8080:8080"  # Seulement pour développement, à retirer en prod
+    build:
+      context: ./backend
     expose:
       - "8080"
     depends_on:
@@ -13,12 +9,16 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/db
+      SPRING_DATASOURCE_USERNAME: usr
+      SPRING_DATASOURCE_PASSWORD: pwd
 
   database:
-    image: my-postgres-image
-    container_name: my_postgres
-    ports:
-      - "5433:5432"  # Pour accéder en local si nécessaire
+    build:
+      context: ./Database
+    expose:
+      - "5432"
     environment:
       POSTGRES_DB: db
       POSTGRES_USER: usr
@@ -30,10 +30,10 @@ services:
     restart: unless-stopped
 
   httpd:
-    image: apache-reverse-proxy
-    container_name: apache-proxy-v3
+    build:
+      context: ./http-server
     ports:
-      - "8088:80"
+      - "80:80"
     depends_on:
       - backend
     networks:
