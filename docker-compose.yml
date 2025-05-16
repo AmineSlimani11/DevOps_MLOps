@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  backend:
+    image: amine-api
+    container_name: backend-api
+    ports:
+      - "8080:8080"  # Seulement pour développement, à retirer en prod
+    expose:
+      - "8080"
+    depends_on:
+      - database
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  database:
+    image: my-postgres-image
+    container_name: my_postgres
+    ports:
+      - "5433:5432"  # Pour accéder en local si nécessaire
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: usr
+      POSTGRES_PASSWORD: pwd
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  httpd:
+    image: apache-reverse-proxy
+    container_name: apache-proxy-v3
+    ports:
+      - "8088:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+
+volumes:
+  db-data:
